@@ -1243,10 +1243,8 @@ public class Program
         // create and use method FindFirstRowMaxIndex(matrix);
         // create and use method SwapColumns(matrix, FindDiagonalMaxIndex, FindFirstRowMaxIndex);
 
-        FindElementDelegate elem_d;
-        FindElementDelegate elem_f;
-        elem_d = FindDiagonalMaxIndex;
-        elem_f = FindalFirstRowMaxIndex;
+        FindElementDelegate elem_d  = FindDiagonalMaxIndex;
+        FindElementDelegate elem_f = FindalFirstRowMaxIndex;
         matrix = SwapColumns(matrix, elem_d, elem_f);
 
         // end
