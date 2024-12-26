@@ -678,49 +678,31 @@ public class Program
         // code here
 
         // use RemoveColumn(matrix, columnIndex); from 2_10
-        for (int j = A.GetLength(1) - 1; j >= 0; j --)
-        {
-            int count = 0;
-            for (int i = 0; i < A.GetLength(0); i++)
-            {
-                if (A[i, j] == 0)
-                {
-                    count++;
-                }
-            }
-            if (count == 0)
-            {
-                A = RemoveColumn(A, j);
-            }
-        }
-        for (int i = 0; i < A.GetLength(0); i++)
-        {
-            for (int j = 0; j < A.GetLength(1); j++)
-            {
-                Console.Write(A[i, j] + " ");
-            }
-            Console.WriteLine();
-        }
 
-        for (int j = B.GetLength(1) - 1; j >= 0; j--)
-        {
-            int count = 0;
-            for (int i = 0; i < B.GetLength(0); i++)
-            {
-                if (B[i, j] == 0)
-                {
-                    count++;
-                }
-            }
-            if (count == 0)
-            {
-                B = RemoveColumn(B, j);
-            }
-        }
+        A = RemoveCountNull(A);
+        B = RemoveCountNull(B);
 
         // end
     }
-
+    public int[,] RemoveCountNull(int[,] matrix)
+    {
+        for (int j = matrix.GetLength(1) - 1; j >= 0; j--)
+        {
+            int count = 0;
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                if (matrix[i, j] == 0)
+                {
+                    count++;
+                }
+            }
+            if (count == 0)
+            {
+                matrix = RemoveColumn(matrix, j);
+            }
+        }
+        return matrix;
+    }
     public void Task_2_21(int[,] A, int[,] B, out int[] answerA, out int[] answerB)
     {
         answerA = null;
@@ -812,6 +794,7 @@ public class Program
         // create and use SwapColumnDiagonal(matrix, columnIndex);
         int i = 0, j = 0;
         FindMaxIndex(A, out i, out j);
+        Console.WriteLine(j);
         A = SwapColumnDiagonal(A, j);
 
         for (int k = 0; k < A.GetLength(0); k++)
@@ -1300,9 +1283,67 @@ public class Program
         // use RemoveColumn(matrix, columnIndex) from Task_2_10
         // create and use method RemoveColumns(matrix, findMaxBelowDiagonalIndex, findMinAboveDiagonalIndex)
 
+        FindIndex below = default(FindIndex);
+        below = FindMaxBelowDiagonalIndex;
+        FindIndex above = default(FindIndex);
+        above = FindMinAboveDiagonalIndex;
+        matrix = RemoveColumns(matrix, below, above);
+
         // end
     }
-
+    public delegate int FindIndex(int[,] matrix);
+    public int FindMaxBelowDiagonalIndex(int[,] matrix)
+    {
+        int max = -999, jmax = 0;
+        for (int i = 0; i < matrix.GetLength(0);i++)
+        {
+            for (int j = 0; j <= i; j++)
+            {
+                if (matrix[i, j] > max)
+                {
+                    max = matrix[i, j];
+                    jmax = j;
+                }
+            }
+        }
+        return jmax;
+    }
+    public int FindMinAboveDiagonalIndex(int[,] matrix)
+    {
+        int min = 999, jmin = 0;
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            for (int j = i + 1; j < matrix.GetLength(1); j++)
+            {
+                if (matrix[i, j] < min)
+                {
+                    min = matrix[i, j];
+                    jmin = j;
+                }
+            }
+        }
+        return jmin;
+    }
+    public int[,] RemoveColumns(int[,] matrix, FindIndex below, FindIndex above)
+    {
+        int bel = below(matrix);
+        int ab = above(matrix);
+        if (bel > ab)
+        {
+            matrix = RemoveColumn(matrix, bel);
+            matrix = RemoveColumn(matrix, ab);
+        }
+        if (bel < ab)
+        {
+            matrix = RemoveColumn(matrix, ab);
+            matrix = RemoveColumn(matrix, bel);
+        }
+        else
+        {
+            matrix = RemoveColumn(matrix, bel);
+        }
+        return matrix;
+    }
     public void Task_3_13(ref int[,] matrix)
     {
         // code here
@@ -1326,9 +1367,49 @@ public class Program
         // use GetMaxNegativePerColumn(matrix) from Task_2_22
         // create and use method FindNegatives(matrix, searcherRows, searcherCols, out rows, out cols);
 
+        GetNegativeArray searcherRows = GetNegativeCountPerRow;
+        GetNegativeArray searcherCols = GetMaxNegativePerColumn;
+        FindNegative(matrix, searcherRows, searcherCols, out rows, out cols);
+
         // end
     }
-
+    public delegate int GetNegativeArray(int[,] matrix, int index);
+    public int GetNegativeCountPerRow(int[,] matrix, int index)
+    {
+        int count = 0;
+        for (int j = 0; j < matrix.GetLength(0); j++)
+        {
+            if (matrix[index, j] < 0)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    public int GetMaxNegativePerColumn(int[,] matrix, int index)
+    {
+        int max = -999;
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            if (matrix[i, index] < 0 && matrix[i, index] > max)
+            {
+                max = matrix[i, index];
+            }
+        }
+        return max;
+    }
+    public void FindNegative(int[,] matrix, GetNegativeArray searcherRows, GetNegativeArray searcherCols, out int[] rows, out int[] cols)
+    {
+        rows = new int[matrix.GetLength(0)]; cols = new int[matrix.GetLength(1)];
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            rows[i] = searcherRows(matrix, i);
+        }
+        for (int i = 0; i < matrix.GetLength(1); i++)
+        {
+            cols[i] = searcherCols(matrix, i);
+        }
+    }
     public void Task_3_27(int[,] A, int[,] B)
     {
         // code here
@@ -1350,9 +1431,63 @@ public class Program
         // create and use method FindDecreasingSequence(array, A, B); similar to FindSequence(array, A, B) in Task_2_28a
         // create and use method DefineSequence(array, findIncreasingSequence, findDecreasingSequence);
 
+        IsSequence inc = FindIncreasingSequence;
+        IsSequence dec = FindDecreasingSequence;
+
+        answerFirst = DefineSequence(first, inc, dec);
+        answerSecond = DefineSequence(second, inc, dec);
         // end
     }
-
+    public delegate bool IsSequence(int[] array, int left, int right);
+    public bool FindIncreasingSequence(int[] array, int A, int B)
+    {
+        bool incr = true;
+        for (int i = A; i < B; i++)
+        {
+            if (array[i] < array[i + 1])
+            {
+                incr = true;
+            }
+            else
+            {
+                incr = false;
+                break;
+            }
+        }
+        return incr;
+    }
+    public bool FindDecreasingSequence(int[] array, int A, int B)
+    {
+        bool decr = true;
+        for (int i = A; i < B; i++)
+        {
+            if (array[i] > array[i + 1])
+            {
+                decr = true;
+            }
+            else
+            {
+                decr = false;
+                break;
+            }
+        }
+        return decr;
+    }
+    public int DefineSequence(int[] array, IsSequence findIncreasingSequence, IsSequence findDecreasingSequence)
+    {
+        if (findIncreasingSequence(array, 0, array.Length - 1))
+        {
+            return 1;
+        }
+        if (findDecreasingSequence(array, 0, array.Length - 1))
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
     public void Task_3_28c(int[] first, int[] second, ref int[] answerFirstIncrease, ref int[] answerFirstDecrease, ref int[] answerSecondIncrease, ref int[] answerSecondDecrease)
     {
         // code here
@@ -1362,7 +1497,38 @@ public class Program
         // use method FindDecreasingSequence(array, A, B); from Task_3_28a
         // create and use method FindLongestSequence(array, sequence);
 
+        IsSequence inc = FindIncreasingSequence;
+        IsSequence dec = FindDecreasingSequence;
+
+        answerFirstIncrease = FindLongestSequence(first, inc);
+        answerFirstDecrease = FindLongestSequence(first, dec);
+
+        answerSecondIncrease = FindLongestSequence(second, inc);
+        answerSecondDecrease = FindLongestSequence(second, dec);
+
         // end
+    }
+    public int[] FindLongestSequence(int[] array, IsSequence sequence)
+    {
+        int max = -999;
+        int[] aaaarray = new int[2];
+        for (int i = 0; i < array.Length - 1; i++)
+        {
+            for (int j = i + 1; j < array.Length; j++)
+            {
+                if (sequence(array, i, j))
+                {
+                    int ij = j - i;
+                    if (ij > max)
+                    {
+                        max = ij;
+                        aaaarray[0] = i;
+                        aaaarray[1] = j;
+                    }
+                }
+            }
+        }
+        return aaaarray;
     }
     #endregion
     #region bonus part
